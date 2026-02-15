@@ -3,6 +3,8 @@ CHANGES
 
 * 0.3.1-1:
 
+  ** Added support for 16_4 model.
+
   ** Added reboot signal to dep package and docs improvements.
 
 * 0.3.0-1:

@@ -13,7 +13,7 @@ CONFIG_DIR="config"
 FIRS_DIR="firs"
 
 # Model dict: "model_id dir_name ..." — add more models here (POSIX sh compatible)
-MODEL_DICT="MacBookPro16,1 16_1 MacBookAir9,1 9_1"
+MODEL_DICT="MacBookPro16,1 16_1 MacBookPro16,4 16_4 MacBookAir9,1 9_1"
 
 get_model_dir() {
     local model="$1"

@@ -9,7 +9,7 @@ Thanks to Asahi Linux, chadmed, Drakelerex and Manawyrm.
 
 ## Supported models:
     
-    # MacBook Pro 16 2019: Id: 16_1
+    # MacBook Pro 16 2019: Id: 16_1 and 16_4
 
     The project has been adjusted to test Asahi Linux audio workflow on a MacBook Por 16 2019 T2 audio driver.
 

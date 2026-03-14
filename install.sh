@@ -6,8 +6,8 @@
 # paths as the deb package; see INSTALL_PATHS.md.
 
 if [ ! -d "config" ] || [ ! -d "firs" ]; then
-    echo "Error: Run this script from the source directory (must contain config/ and firs/)."
-    exit 1
+  echo "Error: Run this script from the source directory (must contain config/ and firs/)."
+  exit 1
 fi
 CONFIG_DIR="config"
 FIRS_DIR="firs"
@@ -16,55 +16,61 @@ FIRS_DIR="firs"
 MODEL_DICT="MacBookPro16,1 16_1 MacBookPro16,4 16_4 MacBookAir9,1 9_1"
 
 get_model_dir() {
-    local model="$1"
-    set -- $MODEL_DICT
-    while [ $# -ge 2 ]; do
-        if [ "$1" = "$model" ]; then
-            echo "$2"
-            return 0
-        fi
-        shift 2
-    done
-    return 1
+  local model="$1"
+  set -- $MODEL_DICT
+  while [ $# -ge 2 ]; do
+    if [ "$1" = "$model" ]; then
+      echo "$2"
+      return 0
+    fi
+    shift 2
+  done
+  return 1
 }
 
 # List of supported models (for error messages), derived from dict keys
-SUPPORTED_MODELS=$(set -- $MODEL_DICT; while [ $# -ge 2 ]; do echo "$1"; shift 2; done)
+SUPPORTED_MODELS=$(
+  set -- $MODEL_DICT
+  while [ $# -ge 2 ]; do
+    echo "$1"
+    shift 2
+  done
+)
 
 # Detect computer model
 MODEL=$(cat /sys/class/dmi/id/product_name 2>/dev/null)
 
 if [ -z "$MODEL" ]; then
-    echo "Error: Could not detect computer model"
-    exit 1
+  echo "Error: Could not detect computer model"
+  exit 1
 fi
 
 # Get directory name from mapping
 MODEL_DIR=$(get_model_dir "$MODEL")
 if [ -z "$MODEL_DIR" ]; then
-    echo "Error: Model '${MODEL}' is not supported"
-    echo "Supported models:"
-    for model_name in $SUPPORTED_MODELS; do
-        echo "  - ${model_name}"
-    done
-    exit 1
+  echo "Error: Model '${MODEL}' is not supported"
+  echo "Supported models:"
+  for model_name in $SUPPORTED_MODELS; do
+    echo "  - ${model_name}"
+  done
+  exit 1
 fi
 
 if [ ! -d "${CONFIG_DIR}/${MODEL_DIR}" ]; then
-    echo "Error: Configuration not found for model: ${MODEL}"
-    echo "Available models:"
-    ls -d ${CONFIG_DIR}/*/ 2>/dev/null | sed 's|.*/||' || echo "  (none found)"
-    exit 1
+  echo "Error: Configuration not found for model: ${MODEL}"
+  echo "Available models:"
+  ls -d ${CONFIG_DIR}/*/ 2>/dev/null | sed 's|.*/||' || echo "  (none found)"
+  exit 1
 fi
 
 echo "Detected model: ${MODEL} (using directory: ${MODEL_DIR})"
 echo "Installing DSP config for ${MODEL}"
 
 # Install WirePlumber DSP config (uses node.software-dsp module like Asahi Linux)
-if ls ${CONFIG_DIR}/${MODEL_DIR}/*-dsp.conf 1> /dev/null 2>&1; then
-    echo "Copying WirePlumber DSP config to /etc/wireplumber/wireplumber.conf.d"
-    sudo mkdir -p /etc/wireplumber/wireplumber.conf.d
-    sudo cp ${CONFIG_DIR}/${MODEL_DIR}/*-dsp.conf /etc/wireplumber/wireplumber.conf.d/
+if ls ${CONFIG_DIR}/${MODEL_DIR}/*-dsp.conf 1>/dev/null 2>&1; then
+  echo "Copying WirePlumber DSP config to /etc/wireplumber/wireplumber.conf.d"
+  sudo mkdir -p /etc/wireplumber/wireplumber.conf.d
+  sudo cp ${CONFIG_DIR}/${MODEL_DIR}/*-dsp.conf /etc/wireplumber/wireplumber.conf.d/
 fi
 
 # Install FIRs, DSP graphs, and Lua scripts to /usr/share/t2-linux-audio/${MODEL_DIR}
@@ -76,25 +82,25 @@ sudo cp ${FIRS_DIR}/${MODEL_DIR}/*.lua /usr/share/t2-linux-audio/${MODEL_DIR}/ 2
 sudo chmod -R o+r /usr/share/t2-linux-audio/${MODEL_DIR}/ 2>/dev/null
 
 # Create symlink for WirePlumber to find Lua scripts
-if ls /usr/share/t2-linux-audio/${MODEL_DIR}/*.lua 1> /dev/null 2>&1; then
-    echo "Creating symlinks for WirePlumber Lua scripts"
-    sudo mkdir -p /usr/share/wireplumber/scripts/device
-    for lua_file in /usr/share/t2-linux-audio/${MODEL_DIR}/*.lua; do
-        lua_basename=$(basename "$lua_file")
-        sudo ln -sf "$lua_file" /usr/share/wireplumber/scripts/device/"$lua_basename"
-    done
+if ls /usr/share/t2-linux-audio/${MODEL_DIR}/*.lua 1>/dev/null 2>&1; then
+  echo "Creating symlinks for WirePlumber Lua scripts"
+  sudo mkdir -p /usr/share/wireplumber/scripts/device
+  for lua_file in /usr/share/t2-linux-audio/${MODEL_DIR}/*.lua; do
+    lua_basename=$(basename "$lua_file")
+    sudo ln -sf "$lua_file" /usr/share/wireplumber/scripts/device/"$lua_basename"
+  done
 fi
 
 # Clean up old PipeWire configurations (now using WirePlumber for both speakers and mic)
 OLD_MODEL_ID=$(echo "$MODEL_DIR" | tr -d '_')
 if [ -f "/etc/pipewire/pipewire.conf.d/t2_${OLD_MODEL_ID}_speakers.conf" ]; then
-    echo "Removing old PipeWire speaker config (now using WirePlumber)"
-    sudo rm -f "/etc/pipewire/pipewire.conf.d/t2_${OLD_MODEL_ID}_speakers.conf"
+  echo "Removing old PipeWire speaker config (now using WirePlumber)"
+  sudo rm -f "/etc/pipewire/pipewire.conf.d/t2_${OLD_MODEL_ID}_speakers.conf"
 fi
 
 if [ -f "/etc/pipewire/pipewire.conf.d/t2_${OLD_MODEL_ID}_mic.conf" ]; then
-    echo "Removing old PipeWire mic config (now using WirePlumber)"
-    sudo rm -f "/etc/pipewire/pipewire.conf.d/t2_${OLD_MODEL_ID}_mic.conf"
+  echo "Removing old PipeWire mic config (now using WirePlumber)"
+  sudo rm -f "/etc/pipewire/pipewire.conf.d/t2_${OLD_MODEL_ID}_mic.conf"
 fi
 
 echo "Restarting WirePlumber and PipeWire for current user ...."
@@ -105,11 +111,11 @@ echo "The raw Apple Audio Device should now be hidden."
 echo "Only the DSP-processed outputs should be visible."
 
 # Check if mic config exists for this model
-if ls ${FIRS_DIR}/${MODEL_DIR}/mic.json 1> /dev/null 2>&1; then
-    echo "  - DSP Speakers"
-    echo "  - DSP Mic"
+if ls ${FIRS_DIR}/${MODEL_DIR}/mic.json 1>/dev/null 2>&1; then
+  echo "  - DSP Speakers"
+  echo "  - DSP Mic"
 else
-    echo "  - DSP Speakers"
+  echo "  - DSP Speakers"
 fi
 
 echo ""

@@ -1,6 +1,10 @@
 CHANGES
 -------
 
+* 1.0.1-1:
+
+  ** Fixed support for 9_1 model.
+
 * 1.0.0-1:
 
   ** Added support for 16_4 model.

@@ -58,25 +58,29 @@ cd t2-apple-audio-dsp
 bash install.sh
 ```
 
-### 1c - NixOS Not tested yet with this new config. Please follow speakers_161
+### 1c - NixOS Module
 
-Copy `pipewire_sink_conf.nix` to `/etc/nixos/` and import it in `configuration.nix`.
+**Currently only speakers are working. Let us know if the microphone setup works for you.**
 
-Add `ladspaPlugins`, `calf` and `lsp-plugins` to `environment.systemPackages` in `configuration.nix`.'
-
-To make the LADSPA + LV2 plugins available for PipeWire we also need to add these ENVs:
-
+Download `nixos/t2AppleAudioDSP.nix` from this repo and import it into your configuration. For example, place it in /etc/nixos and in your configuration.nix, add it to imports, like so:
 ```
-systemd.user.services.pipewire.environment = {
-    LADSPA_PATH = "${pkgs.ladspaPlugins}/lib/ladspa";
-    LV2_PATH = "${config.system.path}/lib/lv2";
-};
+...
+  imports = [
+    ./t2AppleAudioDSP.nix
+  ];
+...
 ```
+Somewhere in your configuration, such as configuration.nix, add:
+```
+  t2AppleAudioDSP = {
+    enable = true;
+    model = "<your_model>";
+  };
+```
+where `<your_model>` is one of "16_1" "16_4" and "9_1". 
 
-Rebuid:
-```
-sudo nixos-rebuild switch   
-```
+Rebuid: 
+```sudo nixos-rebuild switch```
 
 ### 2
 

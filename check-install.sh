@@ -23,7 +23,7 @@ check "$dsp_conf"
 
 echo ""
 echo "=== Audio data: /usr/share/t2-linux-audio/<model>/ ==="
-for model in 16_1 9_1; do
+for model in 16_1 16_2 16_4 9_1; do
     dir="/usr/share/t2-linux-audio/$model"
     if [ -d "$dir" ]; then
         check "$dir"

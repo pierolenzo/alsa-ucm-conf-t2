@@ -1,12 +1,21 @@
 # Better Audio for Macs with the T2 Chip
 
-Currently, someone who wants to run linux on their T2 Mac must install the audio files manually depending on their model and things like switching to headphones when plugging them automatically does not work, so the situation is less than ideal. Coupled with changes made in `apple-bce`, this repository tries to improve this situation. Both `pipewire` and `pulseaudio` can be used. Note that `pulseaudio` is a bit buggy and `pipewire` will work better.
+This repository provides modern ALSA UCM2 (Use Case Manager) configuration files to properly route audio and automatically switch between speakers and headphones on Macs with the T2 Security Chip. 
 
-Note that an `apple-bce` with [these changes made](https://github.com/kekrby/apple-bce) is required.
+Previously, this required complex PulseAudio/PipeWire profile-sets and udev rules which still struggled with things like headphone jack detection. By moving to UCM2, the audio server (PipeWire or PulseAudio) can natively understand the hardware layout and seamlessly handle jack insertion events.
 
-The files are based on `https://gist.github.com/MCMrARM/c357291e4e5c18894bea10665dcebffb`, `https://gist.github.com/kevineinarsson/8e5e92664f97508277fefef1b8015fba`, `https://gist.github.com/bigbadmonster17/8b670ae29e0b7be2b73887f3f37a057b` and `https://github.com/Redecorating/archlinux-t2-packages/tree/main/apple-t2-audio-config`.
+Note that an `apple-bce` driver exposing standard ALSA controls is required. 
+
+The original PulseAudio files were based on various community gists.
 
 ## Installation
-You can install the files using `install.sh`.
+You can install the ALSA UCM configuration files using `install.sh`.
 
-Note that some distributions (for example NixOS) may have different ways to install the files.
+```bash
+sudo ./install.sh
+```
+
+This will copy the contents of the `ucm2/` directory to `/usr/share/alsa/ucm2/`.
+After installation, restart your audio services (e.g., `systemctl --user restart pipewire pipewire-pulse wireplumber`).
+
+Note that some distributions (for example NixOS) may have different ways to install the files or require pointing to a custom ALSA topology path.

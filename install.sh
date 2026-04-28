@@ -48,13 +48,11 @@ do
     fi
 done
 
-for dir in "/usr/share/alsa-card-profile/mixer" "/usr/share/pulseaudio/alsa-mixer"
-do
-    if [ -d "$dir" ]
-    then
-        cp -rv files/profile-sets $dir
-        cp -rv files/paths $dir
-    fi
-done
+ucm_dir="/usr/share/alsa/ucm2"
+if [ -d "$ucm_dir" ]
+then
+    cp -rv ucm2/* "$ucm_dir/"
+else
+    echo "Directory $ucm_dir not found, UCM2 might not be installed."
+fi
 
-cp -v files/91-audio-custom.rules /usr/lib/udev/rules.d/

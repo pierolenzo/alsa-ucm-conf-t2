@@ -9,24 +9,59 @@ then
     exit 0
 fi
 
-echo "Cleaning up any legacy ALSA/PulseAudio configuration files..."
-# Silently remove legacy configuration files (from main branch and older versions)
+LOG_FILE="/var/log/t2-audio-install.log"
+
+log_action() {
+    local msg="$(date '+%Y-%m-%d %H:%M:%S') - $1"
+    echo "$msg"
+    echo "$msg" >> "$LOG_FILE"
+}
+
+log_action "Starting T2 audio configuration installation..."
+log_action "Cleaning up any legacy ALSA/PulseAudio configuration files..."
+
+# Remove legacy configuration files (from main branch and older versions)
 for dir in "/usr/share/pulseaudio/alsa-mixer" "/usr/share/alsa-card-profile/mixer"
 do
     if [ -d "$dir" ]; then
-        rm -f "$dir/profile-sets/apple-t2"*
-        rm -f "$dir/paths/t2-"*
+        for f in "$dir/profile-sets/apple-t2"* "$dir/paths/t2-"*; do
+            if [ -e "$f" ] || [ -L "$f" ]; then
+                log_action "Removing legacy file: $f"
+                rm -f "$f"
+            fi
+        done
     fi
 done
-rm -f "/usr/lib/udev/rules.d/91-pulseaudio-custom.rules"
-rm -f "/usr/lib/udev/rules.d/91-audio-custom.rules"
-rm -f "/usr/share/alsa/cards/AppleT2.conf"
+
+for f in "/usr/lib/udev/rules.d/91-pulseaudio-custom.rules" \
+         "/usr/lib/udev/rules.d/91-audio-custom.rules" \
+         "/usr/share/alsa/cards/AppleT2.conf"; do
+    if [ -e "$f" ] || [ -L "$f" ]; then
+        log_action "Removing legacy file: $f"
+        rm -f "$f"
+    fi
+done
 
 ucm_dir="/usr/share/alsa/ucm2"
 if [ -d "$ucm_dir" ]
 then
-    echo "Installing ALSA UCM2 profiles..."
-    cp -av ucm2/* "$ucm_dir/"
+    log_action "Installing ALSA UCM2 profiles into $ucm_dir..."
+    
+    # Copy files and log each copied file
+    cp -av ucm2/* "$ucm_dir/" | while IFS= read -r line; do
+        case "$line" in
+            removed*)
+                log_action "Overwritten: ${line#removed }"
+                ;;
+            *-\>*)
+                dest="${line#*-> }"
+                log_action "Installed: $dest"
+                ;;
+            *)
+                log_action "$line"
+                ;;
+        esac
+    done
     
     echo ""
     echo "======================================================="
@@ -44,5 +79,5 @@ then
     echo "WirePlumber will remember this preference for future automatic switching."
     echo "======================================================="
 else
-    echo "Error: Directory $ucm_dir not found. ALSA UCM2 might not be installed."
+    log_action "Error: Directory $ucm_dir not found. ALSA UCM2 might not be installed."
 fi

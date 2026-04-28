@@ -51,7 +51,7 @@ done
 ucm_dir="/usr/share/alsa/ucm2"
 if [ -d "$ucm_dir" ]
 then
-    cp -rv ucm2/* "$ucm_dir/"
+    cp -av ucm2/* "$ucm_dir/"
 else
     echo "Directory $ucm_dir not found, UCM2 might not be installed."
 fi

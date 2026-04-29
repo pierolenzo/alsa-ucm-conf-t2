@@ -18,4 +18,14 @@ sudo ./install.sh
 This will copy the contents of the `ucm2/` directory to `/usr/share/alsa/ucm2/`.
 After installation, restart your audio services (e.g., `systemctl --user restart pipewire pipewire-pulse wireplumber`).
 
+## Uninstallation
+To remove the installed configuration and revert to default settings:
+
+```bash
+sudo ./uninstall.sh
+```
+
+This will remove the T2-specific UCM profiles from `/usr/share/alsa/ucm2/`.
+After uninstallation, restart your audio services to apply the changes.
+
 Note that some distributions (for example NixOS) may have different ways to install the files or require pointing to a custom ALSA topology path.

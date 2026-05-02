@@ -14,6 +14,7 @@ LEGACY_DIRS="
 "
 
 LEGACY_FILES="
+/usr/lib/udev/rules.d/91-audio-custom.rules
 /usr/lib/udev/rules.d/91-pulseaudio-custom.rules
 /usr/share/alsa/cards/AppleT2.conf
 "
